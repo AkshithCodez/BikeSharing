@@ -1,0 +1,16 @@
+# Virtual Environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Data files - We don't want to upload large CSVs to Git
+data/
+
+# Saved models
+saved_models/
+
+# VS Code settings
+.vscode/
