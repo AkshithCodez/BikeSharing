@@ -3,6 +3,7 @@
 import sys
 import os
 from dataclasses import dataclass
+
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -83,10 +84,12 @@ class DataTransformation:
 
             # Define features for the model
             input_feature_train_df = train_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered'], axis=1)
-            target_feature_train_df = train_df[target_column_name]
+            # Apply the log transformation to the target variable
+            target_feature_train_df = np.log1p(train_df[target_column_name])
 
             input_feature_test_df = test_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered'], axis=1)
-            target_feature_test_df = test_df[target_column_name]
+            # Apply the log transformation to the target variable
+            target_feature_test_df = np.log1p(test_df[target_column_name])
 
             logging.info("Applying preprocessing object on training dataframe and testing dataframe.")
 

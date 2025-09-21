@@ -2,6 +2,7 @@
 
 import sys
 import pandas as pd
+import numpy as np
 from src.exception import CustomException
 from src.utils import load_object
 
@@ -13,11 +14,20 @@ class PredictPipeline:
         try:
             model_path = 'saved_models/model.pkl'
             preprocessor_path = 'saved_models/preprocessor.pkl'
+            
+            # Load the saved model and preprocessor objects
             model = load_object(file_path=model_path)
             preprocessor = load_object(file_path=preprocessor_path)
+            
+            # Scale the features and make a prediction
             data_scaled = preprocessor.transform(features)
-            preds = model.predict(data_scaled)
+            preds_log = model.predict(data_scaled)
+            
+            # Reverse the log transformation to get the actual count
+            preds = np.expm1(preds_log)
+            
             return preds
+        
         except Exception as e:
             raise CustomException(e, sys)
 
