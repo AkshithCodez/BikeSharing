@@ -30,7 +30,7 @@ class DataTransformation:
         try:
             # Define which columns should be ordinal-encoded and which should be scaled
             numerical_columns = ["temp", "atemp", "humidity", "windspeed"]
-            categorical_columns = ["season", "holiday", "workingday", "weather"]
+            categorical_columns = ["season", "holiday", "workingday", "weather", "day_of_week"]
 
             # Numerical Pipeline
             num_pipeline = Pipeline(
@@ -74,13 +74,14 @@ class DataTransformation:
 
             target_column_name = "count"
 
-            # Feature Engineering: Extract hour, day, month, year from datetime
+            # Feature Engineering: Extract time-based features from datetime
             for df in [train_df, test_df]:
                 df['datetime'] = pd.to_datetime(df['datetime'])
                 df['hour'] = df['datetime'].dt.hour
                 df['day'] = df['datetime'].dt.day
                 df['month'] = df['datetime'].dt.month
                 df['year'] = df['datetime'].dt.year
+                df['day_of_week'] = df['datetime'].dt.dayofweek # Add day of the week
 
             # Define features for the model
             input_feature_train_df = train_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered'], axis=1)
