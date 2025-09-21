@@ -15,15 +15,12 @@ class PredictPipeline:
             model_path = 'saved_models/model.pkl'
             preprocessor_path = 'saved_models/preprocessor.pkl'
             
-            # Load the saved model and preprocessor objects
             model = load_object(file_path=model_path)
             preprocessor = load_object(file_path=preprocessor_path)
             
-            # Scale the features and make a prediction
             data_scaled = preprocessor.transform(features)
             preds_log = model.predict(data_scaled)
             
-            # Reverse the log transformation to get the actual count
             preds = np.expm1(preds_log)
             
             return preds
@@ -61,6 +58,10 @@ class CustomData:
 
     def get_data_as_data_frame(self):
         try:
+            # Create a datetime object to calculate day_of_week
+            date_str = f"{self.year}-{self.month}-{self.day}"
+            dt_obj = pd.to_datetime(date_str)
+
             custom_data_input_dict = {
                 "season": [self.season],
                 "holiday": [self.holiday],
@@ -75,6 +76,16 @@ class CustomData:
                 "month": [self.month],
                 "year": [self.year],
             }
-            return pd.DataFrame(custom_data_input_dict)
+            
+            df = pd.DataFrame(custom_data_input_dict)
+
+            # --- ADD THE SAME FEATURE ENGINEERING AS IN TRAINING ---
+            df['day_of_week'] = dt_obj.dayofweek
+            df['is_rush_hour'] = df['hour'].apply(lambda x: 1 if (7 <= x <= 9) or (16 <= x <= 18) else 0)
+            df['is_bad_weather'] = df['weather'].apply(lambda x: 1 if x in [3, 4] else 0)
+            df['peak_bad_weather_interaction'] = df['is_rush_hour'] * df['is_bad_weather']
+            
+            return df
+
         except Exception as e:
             raise CustomException(e, sys)

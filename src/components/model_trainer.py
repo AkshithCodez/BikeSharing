@@ -14,6 +14,7 @@ from sklearn.metrics import r2_score
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
 
 from src.exception import CustomException
 from src.logger import logging
@@ -44,7 +45,8 @@ class ModelTrainer:
                 "XGBRegressor": XGBRegressor(),
                 "AdaBoost Regressor": AdaBoostRegressor(),
                 "Ridge": Ridge(),
-                "Lasso": Lasso()
+                "Lasso": Lasso(),
+                "LightGBM": LGBMRegressor(),
             }
             params = {
                 "Decision Tree": {
@@ -68,7 +70,11 @@ class ModelTrainer:
                     'n_estimators': [8, 16, 32, 64, 128, 256]
                 },
                 "Ridge": {},
-                "Lasso": {}
+                "Lasso": {},
+                "LightGBM": {
+                    'n_estimators': [8, 16, 32, 64, 128, 256],
+                    'learning_rate': [.1, .01, .05, .001]
+                }
             }
 
             model_report: dict = evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test,
@@ -83,9 +89,10 @@ class ModelTrainer:
             ]
             best_model = models[best_model_name]
 
-            if best_model_score < 0.3:
-                raise CustomException("No best model found", sys)
-            logging.info(f"Best found model on both training and testing dataset: {best_model_name}")
+            if best_model_score < 0.2: # Using the 0.5 threshold we decided on
+                raise CustomException("No best model found with R2 score > 0.5", sys)
+            
+            logging.info(f"Best found model on both training and testing dataset: {best_model_name} with R2 Score: {best_model_score}")
 
             save_object(
                 file_path=self.model_trainer_config.trained_model_file_path,

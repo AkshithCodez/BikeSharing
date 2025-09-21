@@ -6,3 +6,4 @@ seaborn
 streamlit
 dill
 xgboost
+lightgbm 

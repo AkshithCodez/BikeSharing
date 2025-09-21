@@ -28,9 +28,23 @@ class DataTransformation:
         This function is responsible for data transformation
         '''
         try:
-            # Define which columns should be ordinal-encoded and which should be scaled
-            numerical_columns = ["temp", "atemp", "humidity", "windspeed"]
-            categorical_columns = ["season", "holiday", "workingday", "weather", "day_of_week"]
+            # Define which columns are numerical and categorical
+            numerical_columns = [
+                "temp", 
+                "atemp", 
+                "humidity", 
+                "windspeed", 
+                "is_rush_hour", 
+                "is_bad_weather", 
+                "peak_bad_weather_interaction"
+            ]
+            categorical_columns = [
+                "season", 
+                "holiday", 
+                "workingday", 
+                "weather", 
+                "day_of_week"
+            ]
 
             # Numerical Pipeline
             num_pipeline = Pipeline(
@@ -81,7 +95,14 @@ class DataTransformation:
                 df['day'] = df['datetime'].dt.day
                 df['month'] = df['datetime'].dt.month
                 df['year'] = df['datetime'].dt.year
-                df['day_of_week'] = df['datetime'].dt.dayofweek # Add day of the week
+                df['day_of_week'] = df['datetime'].dt.dayofweek
+                
+                # Create rush hour and bad weather flags
+                df['is_rush_hour'] = df['hour'].apply(lambda x: 1 if (7 <= x <= 9) or (16 <= x <= 18) else 0)
+                df['is_bad_weather'] = df['weather'].apply(lambda x: 1 if x in [3, 4] else 0)
+                
+                # Create the interaction feature
+                df['peak_bad_weather_interaction'] = df['is_rush_hour'] * df['is_bad_weather']
 
             # Define features for the model
             input_feature_train_df = train_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered'], axis=1)
