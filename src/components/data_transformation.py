@@ -28,49 +28,25 @@ class DataTransformation:
         This function is responsible for data transformation
         '''
         try:
-            # Define which columns are numerical and categorical
             numerical_columns = [
-                "temp", 
-                "atemp", 
-                "humidity", 
-                "windspeed", 
-                "is_rush_hour", 
-                "is_bad_weather", 
-                "peak_bad_weather_interaction"
+                "temp", "atemp", "humidity", "windspeed", "is_rush_hour", 
+                "is_bad_weather", "peak_bad_weather_interaction",
+                "hour_sin", "hour_cos", "month_sin", "month_cos", "heat_index"
             ]
             categorical_columns = [
-                "season", 
-                "holiday", 
-                "workingday", 
-                "weather", 
-                "day_of_week"
+                "season", "holiday", "workingday", "weather", "day_of_week", "year"
             ]
 
-            # Numerical Pipeline
-            num_pipeline = Pipeline(
-                steps=[
-                    ("imputer", SimpleImputer(strategy="median")),
-                    ("scaler", StandardScaler())
-                ]
-            )
-            # Categorical Pipeline
-            cat_pipeline = Pipeline(
-                steps=[
-                    ("imputer", SimpleImputer(strategy="most_frequent")),
-                    ("one_hot_encoder", OneHotEncoder()),
-                    ("scaler", StandardScaler(with_mean=False))
-                ]
-            )
+            num_pipeline = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
+            cat_pipeline = Pipeline(steps=[("imputer", SimpleImputer(strategy="most_frequent")), ("one_hot_encoder", OneHotEncoder()), ("scaler", StandardScaler(with_mean=False))])
 
             logging.info(f"Categorical columns: {categorical_columns}")
             logging.info(f"Numerical columns: {numerical_columns}")
 
-            preprocessor = ColumnTransformer(
-                [
-                    ("num_pipeline", num_pipeline, numerical_columns),
-                    ("cat_pipelines", cat_pipeline, categorical_columns)
-                ]
-            )
+            preprocessor = ColumnTransformer([
+                ("num_pipeline", num_pipeline, numerical_columns),
+                ("cat_pipelines", cat_pipeline, categorical_columns)
+            ])
             return preprocessor
 
         except Exception as e:
@@ -82,56 +58,45 @@ class DataTransformation:
             test_df = pd.read_csv(test_path)
 
             logging.info("Read train and test data completed")
-            logging.info("Obtaining preprocessing object")
-
             preprocessing_obj = self.get_data_transformer_object()
-
             target_column_name = "count"
 
-            # Feature Engineering: Extract time-based features from datetime
             for df in [train_df, test_df]:
                 df['datetime'] = pd.to_datetime(df['datetime'])
                 df['hour'] = df['datetime'].dt.hour
-                df['day'] = df['datetime'].dt.day
                 df['month'] = df['datetime'].dt.month
+                df['day'] = df['datetime'].dt.day
                 df['year'] = df['datetime'].dt.year
                 df['day_of_week'] = df['datetime'].dt.dayofweek
                 
-                # Create rush hour and bad weather flags
                 df['is_rush_hour'] = df['hour'].apply(lambda x: 1 if (7 <= x <= 9) or (16 <= x <= 18) else 0)
                 df['is_bad_weather'] = df['weather'].apply(lambda x: 1 if x in [3, 4] else 0)
-                
-                # Create the interaction feature
                 df['peak_bad_weather_interaction'] = df['is_rush_hour'] * df['is_bad_weather']
 
-            # Define features for the model
-            input_feature_train_df = train_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered'], axis=1)
-            # Apply the log transformation to the target variable
+                df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24.0)
+                df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24.0)
+                df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12.0)
+                df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12.0)
+                
+                df['heat_index'] = df['temp'] * df['humidity']
+
+            # 'year' is NOT dropped, as it's used as a categorical feature
+            input_feature_train_df = train_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered', 'hour', 'month', 'day'], axis=1)
             target_feature_train_df = np.log1p(train_df[target_column_name])
 
-            input_feature_test_df = test_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered'], axis=1)
-            # Apply the log transformation to the target variable
+            input_feature_test_df = test_df.drop(columns=[target_column_name, 'datetime', 'casual', 'registered', 'hour', 'month', 'day'], axis=1)
             target_feature_test_df = np.log1p(test_df[target_column_name])
 
-            logging.info("Applying preprocessing object on training dataframe and testing dataframe.")
-
+            logging.info("Applying preprocessing object.")
             input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
             input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
 
             train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
             test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
 
+            save_object(file_path=self.data_transformation_config.preprocessor_obj_file_path, obj=preprocessing_obj)
             logging.info("Saved preprocessing object.")
 
-            save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=preprocessing_obj
-            )
-
-            return (
-                train_arr,
-                test_arr,
-                self.data_transformation_config.preprocessor_obj_file_path,
-            )
+            return (train_arr, test_arr, self.data_transformation_config.preprocessor_obj_file_path)
         except Exception as e:
             raise CustomException(e, sys)

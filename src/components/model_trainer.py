@@ -89,7 +89,7 @@ class ModelTrainer:
             ]
             best_model = models[best_model_name]
 
-            if best_model_score < 0.2: # Using the 0.5 threshold we decided on
+            if best_model_score < 0.5: # Using the 0.5 threshold we decided on
                 raise CustomException("No best model found with R2 score > 0.5", sys)
             
             logging.info(f"Best found model on both training and testing dataset: {best_model_name} with R2 Score: {best_model_score}")
