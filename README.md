@@ -1,124 +1,140 @@
-🚲 End-to-End Bike Sharing Demand Prediction 🚲
-🎯 Project Overview
-This project implements an end-to-end machine learning solution to predict the hourly demand for a bike-sharing program. Using a real-world dataset from Capital Bikeshare in Washington D.C., the primary objective is to build a robust regression model that accurately forecasts the total number of bike rentals (count).
 
-The project follows a modular, production-ready code structure, encompassing the entire machine learning life cycle: from data ingestion and exploratory data analysis to advanced feature engineering, model training, and finally, deployment as an interactive web application using Streamlit. The final model achieves a high R² score, demonstrating its effectiveness in capturing complex patterns in the data.
+# 🚲 End-to-End Bike Sharing Demand Prediction 🎯
 
-✨ Key Features
-🧱 Modular Architecture: The codebase is organized into a clean, reusable structure with separate components for data ingestion, transformation, and model training.
+This project implements an **end-to-end machine learning solution** to predict the hourly demand for a bike-sharing program.
+Using a real-world dataset from **Capital Bikeshare in Washington D.C.**, the primary objective is to build a robust regression model that accurately forecasts the total number of bike rentals (**count**).
 
-🛠️ Advanced Feature Engineering: Goes beyond basic features to create sophisticated inputs like:
+The project follows a **modular, production-ready code structure**, encompassing the entire machine learning life cycle:
+from **data ingestion** and **exploratory data analysis** to **advanced feature engineering**, **model training**, and finally, **deployment** as an interactive **Streamlit web application**.
 
-🔄 Cyclical Time Features: Uses sine/cosine transformations for hour and month to help the model understand the cyclical nature of time.
+The final model achieves a **high R² score**, demonstrating its effectiveness in capturing complex patterns in the data.
 
-🤝 Interaction Features: Creates features to capture the combined effect of conditions, such as the interaction between bad weather and peak commute times.
+---
 
-🌡️ Comfort Index: Combines temperature and humidity into a single heat_index to better represent how weather feels.
+## ✨ Key Features
 
-🏆 Competitive Model Evaluation: Trains and evaluates a comprehensive suite of regression models to systematically identify the best performer for this specific problem.
+* 🧱 **Modular Architecture**: Clean, reusable code with separate components for data ingestion, transformation, and model training.
+* 🛠️ **Advanced Feature Engineering**:
 
-⚙️ Robust Preprocessing: Implements a full preprocessing pipeline using Scikit-learn, handling categorical and numerical data, scaling, and encoding.
+  * 🔄 *Cyclical Time Features*: Sine/cosine transformations for hour and month.
+  * 🤝 *Interaction Features*: Captures combined effects (e.g., bad weather + peak commute).
+  * 🌡️ *Comfort Index*: Combines temperature & humidity into a single `heat_index`.
+* 🏆 **Competitive Model Evaluation**: Comprehensive suite of regression models compared to select the best performer.
+* ⚙️ **Robust Preprocessing**: Full Scikit-learn pipeline for scaling, encoding, and transformation.
+* 🖥️ **Interactive Web Application**: Streamlit app where users can input conditions and receive live demand predictions.
 
-🖥️ Interactive Web Application: Deploys the final model as a user-friendly Streamlit application where users can input conditions and receive a live demand prediction.
+---
 
-💻 Tech Stack
-Language: Python
+## 💻 Tech Stack
 
-Libraries:
+* **Language**: Python
+* **Libraries**:
 
-Data & Analysis: Pandas, NumPy
+  * Data & Analysis → *Pandas, NumPy*
+  * Machine Learning → *Scikit-learn, XGBoost, LightGBM*
+  * Web Framework → *Streamlit*
+  * Utilities → *dill (for object serialization)*
 
-Machine Learning: Scikit-learn, XGBoost, LightGBM
+---
 
-Web Framework: Streamlit
+## 🤖 Modeling Approach
 
-Utilities: dill (for object serialization)
+The project follows a **robust model selection process**:
 
-🤖 Modeling Approach
-The core of this project is a robust model selection process. To ensure the highest accuracy, a wide range of regression algorithms are trained and evaluated in a competitive pipeline. The model with the highest R² score on the test set is automatically selected, tuned, and saved for deployment.
+1. Train multiple regression models.
+2. Evaluate each using the test R² score.
+3. Select the top-performing model, tune it, and save for deployment.
 
-The models included in the competition are:
+**Models Trained:**
 
-Linear Models:
+* **Linear Models**: Linear Regression, Ridge, Lasso
+* **Tree-Based Models**: Decision Tree, Random Forest, AdaBoost, Gradient Boosting
+* **Boosting Models**: XGBoost, LightGBM *(🏆 often the best performer)*
 
-Linear Regression
+---
 
-Ridge Regression
+## 📁 Project Architecture
 
-Lasso Regression
-
-Tree-Based Ensemble Models:
-
-Decision Tree Regressor
-
-Random Forest Regressor
-
-AdaBoost Regressor
-
-Gradient Boosting Regressor
-
-XGBoost Regressor
-
-LightGBM Regressor (🏆 Often the top performer)
-
-📁 Project Architecture
-The project follows a modular structure to ensure scalability and maintainability.
-
+```
 BikeSharing/
 │
-├── 📂 data/
-├── 📜 logs/
-├── 💾 saved_models/
-├── ✒️ scripts/
-├── 📦 src/
-│   ├── 🧩 components/
+├── data/                # Raw and processed data
+├── logs/                # Training and evaluation logs
+├── saved_models/        # Serialized models & preprocessors
+├── scripts/             # Utility scripts
+├── src/
+│   ├── components/      # Core ML components
 │   │   ├── data_ingestion.py
 │   │   ├── data_transformation.py
 │   │   └── model_trainer.py
 │   │
-│   └── 🔗 pipeline/
-│       ├── predict_pipeline.py
-│       └── train_pipeline.py
+│   └── pipeline/        # Training & prediction pipelines
+│       ├── train_pipeline.py
+│       └── predict_pipeline.py
 │
-├── 🚀 app.py
-├── 📋 requirements.txt
-└── 📄 README.md
+├── app.py               # Streamlit web application
+├── requirements.txt     # Project dependencies
+└── README.md            # Project documentation
+```
 
-🚀 Setup and Installation
-Follow these steps to set up the project environment on your local machine.
+---
 
-1. Clone the Repository
-git clone [https://github.com/](https://github.com/)<your-github-username>/BikeSharing.git
-cd BikeSharing
+## 🚀 Setup and Installation
 
-2. Create a Virtual Environment
-It's recommended to use a virtual environment to manage dependencies.
+1. **Clone the Repository**
 
-python -m venv venv
-venv\Scripts\activate  # On Windows
-# source venv/bin/activate  # On macOS/Linux
+   ```bash
+   git clone https://github.com/<your-github-username>/BikeSharing.git
+   cd BikeSharing
+   ```
 
-3. Install Required Libraries
-All project dependencies are listed in requirements.txt.
+2. **Create a Virtual Environment**
 
-pip install -r requirements.txt
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate      # On Windows
+   # source venv/bin/activate  # On macOS/Linux
+   ```
 
-▶️ How to Run the Project
-The project is run in two main steps: first, train the model, and then launch the web application.
+3. **Install Required Libraries**
 
-Step 1: Train the Model 🧠
-Execute the training pipeline script. This will perform data ingestion, transformation, and model training, and it will save the final model.pkl and preprocessor.pkl files in the saved_models/ directory.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+---
+
+## ▶️ How to Run the Project
+
+### Step 1: Train the Model 🧠
+
+Run the training pipeline:
+
+```bash
 python -m src.pipeline.train_pipeline
+```
 
-You will see logs printed to the console, and the script will finish by displaying the final R² score of the best model.
+* Performs data ingestion, transformation, and training.
+* Saves the final `model.pkl` and `preprocessor.pkl` into `saved_models/`.
+* Displays the final **R² score** in the console.
 
-Step 2: Launch the Streamlit Web App 🌐
-Once the model is trained, you can start the interactive web application.
+### Step 2: Launch the Web App 🌐
 
+Run the Streamlit app:
+
+```bash
 streamlit run app.py
+```
 
-This will automatically open a new tab in your web browser at http://localhost:8501, where you can use the application to get live predictions.
+* Opens in your browser at: [http://localhost:8501](http://localhost:8501)
 
-📈 Model Performance
-After extensive feature engineering and model tuning, the final model achieved an R² Score of 0.96 on the test set, indicating a very high level of accuracy in predicting bike rental demand.
+---
+
+## 📈 Model Performance
+
+After **extensive feature engineering** and **hyperparameter tuning**,
+the final model achieved an **R² Score of 0.96** on the test set,
+indicating **very high accuracy** in predicting bike rental demand.
+
+---
+
